@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::util::{ensure_eq, Result};
 
 use super::{
-    super::{Readable, Parser},
+    super::{Parser, Readable},
     CharacterBio, CharacterInfo, CharacterSkills, CharacterStash, FactionPack, Header, Inventory,
     LoreNotes, MarkerList, PlayStats, RespawnList, ShrineList, TeleportList, TriggerTokens,
     TutorialPages, UISettings, UID,
@@ -35,17 +35,12 @@ impl Readable for CharacterFile {
     where
         Self: Sized,
     {
-        ensure_eq(
-            reader.read_int()?,
-            0x58434447,
-            "expected to read 0x58434447".to_owned(),
-        )?;
-        ensure_eq(reader.read_int()?, 2, "expected to read 2".to_owned())?;
+        ensure_eq(reader.read_int()?, 0x58434447, "start bytes")?;
+        ensure_eq(reader.read_int()?, 2, "start bytes 1")?;
         let hdr = Header::read_from(reader)?;
-        ensure_eq(reader.read_byte()?, 3, "expected to read 3".to_owned())?;
-        ensure_eq(reader.next_int()?, 0, "expected to read 0".to_owned())?;
-        let ver = reader.read_int()?;
-        assert_eq!(ver, 8, "read: version not 8");
+        ensure_eq(reader.read_byte()?, 3, "start bytes 2")?;
+        ensure_eq(reader.next_int()?, 0, "start bytes 3")?;
+        ensure_eq(reader.read_int()?, 8, "version")?;
         let id = UID::read_from(reader)?;
         let info = CharacterInfo::read_from(reader)?;
         let bio = CharacterBio::read_from(reader)?;

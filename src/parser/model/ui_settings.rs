@@ -6,7 +6,7 @@ use serde_big_array::BigArray;
 use crate::util::Result;
 
 use super::{
-    super::{Readable, Parser},
+    super::{Parser, Readable},
     HotSlot,
 };
 
@@ -21,12 +21,14 @@ pub struct UISettings {
     unknown6: [u8; 5],
     unknown1: u8,
     unknown3: u8,
+    maybe_loot_radius: f32,
 }
+
+const VERSIONS: [u32; 2] = [5, 6];
 
 impl Readable for UISettings {
     fn read_from(reader: &mut dyn Parser) -> Result<Self> {
-        reader.start_block_with_version(14, 5)?;
-
+        let version = reader.start_block_with_versions(14, &VERSIONS)?;
         let unknown1 = reader.read_byte()?;
         let unknown2 = reader.read_int()?;
         let unknown3 = reader.read_byte()?;
@@ -41,6 +43,12 @@ impl Readable for UISettings {
         let hot_slots = array::try_from_fn(|_| HotSlot::read_from(reader))?;
         let camera_distance = reader.read_float()?;
 
+        let maybe_loot_radius = if version == 6 {
+            reader.read_float()?
+        } else {
+            -1.0
+        };
+
         reader.end_block()?;
 
         Ok(UISettings {
@@ -52,6 +60,7 @@ impl Readable for UISettings {
             unknown6,
             unknown1,
             unknown3,
+            maybe_loot_radius,
         })
     }
 }

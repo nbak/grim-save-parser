@@ -1,3 +1,5 @@
+use std::fmt::{Debug, Display};
+
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[derive(Debug)]
@@ -19,13 +21,30 @@ impl std::fmt::Display for CustomError {
 
 impl std::error::Error for CustomError {}
 
-pub fn ensure_eq<T>(a: T, b: T, message: String) -> Result<()>
+pub fn ensure_eq<T>(actual: T, expected: T, message: &str) -> Result<T>
 where
-    T: Eq,
+    T: Eq + Display,
 {
-    if a != b {
-        Err(CustomError::new(message))
+    if !(actual == expected) {
+        Err(CustomError::new(format!(
+            "{}: expected {}, found {}",
+            message, expected, actual
+        )))
     } else {
-        Ok(())
+        Ok(actual)
+    }
+}
+
+pub fn ensure_contains<T>(actual: T, expected: &[T], message: &str) -> Result<T>
+where
+    T: Eq + Display + Debug,
+{
+    if !expected.contains(&actual) {
+        Err(CustomError::new(format!(
+            "{}: expected {:?}, found {}",
+            message, expected, actual
+        )))
+    } else {
+        Ok(actual)
     }
 }

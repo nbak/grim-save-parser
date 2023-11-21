@@ -1,7 +1,7 @@
 use std::{cell::RefMut, io::Read};
 
 use crate::read_exact;
-use crate::util::{ensure_eq, Result};
+use crate::util::{ensure_contains, ensure_eq, Result};
 
 pub trait Parser {
     fn get_source(&self) -> RefMut<dyn Read>;
@@ -65,11 +65,7 @@ pub trait Parser {
     }
     fn start_block(&mut self, t: u32) -> Result<()> {
         let mut b = Block::new();
-        ensure_eq(
-            self.read_block_start(&mut b)?,
-            t,
-            format!("block start not equal {}", t),
-        )?;
+        ensure_eq(self.read_block_start(&mut b)?, t, "block start")?;
 
         self.push_block(b);
         Ok(())
@@ -79,21 +75,27 @@ pub trait Parser {
         ensure_eq(
             self.read_block_start(&mut b)?,
             t,
-            format!("block start not equal {}", t),
+            "block start with version",
         )?;
-        ensure_eq(self.read_int()?, v, format!("version not equal {}", v))?;
+        ensure_eq(self.read_int()?, v, "version")?;
         self.push_block(b);
         Ok(())
     }
+    fn start_block_with_versions(&mut self, t: u32, v: &[u32]) -> Result<u32> {
+        let mut b = Block::new();
+        ensure_eq(
+            self.read_block_start(&mut b)?,
+            t,
+            "block start with version",
+        )?;
+        let version = ensure_contains(self.read_int()?, v, "version")?;
+        self.push_block(b);
+        Ok(version)
+    }
     fn end_block(&mut self) -> Result<()> {
         let b = self.pop_block()?;
-        ensure_eq(
-            self.get_pos(),
-            b.end,
-            "end block: block end position not ok".to_owned(),
-        )?;
-        let nxt = self.next_int()?;
-        ensure_eq(nxt, 0, "read_block_end: expected to read 0".to_owned())?;
+        ensure_eq(self.get_pos(), b.end, "block end position")?;
+        ensure_eq(self.next_int()?, 0, "block end")?;
         Ok(())
     }
 }

@@ -5,7 +5,7 @@ use serde_big_array::BigArray;
 
 use crate::util::Result;
 
-use super::super::{Readable, Parser};
+use super::super::{Parser, Readable};
 
 #[derive(Deserialize, Serialize)]
 pub struct CharacterInfo {
