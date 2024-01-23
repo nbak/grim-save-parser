@@ -21,7 +21,7 @@ pub struct UISettings {
     unknown6: [u8; 5],
     unknown1: u8,
     unknown3: u8,
-    maybe_loot_radius: f32,
+    unknown7: Option<u32>,
 }
 
 const VERSIONS: [u32; 2] = [5, 6];
@@ -41,13 +41,14 @@ impl Readable for UISettings {
             unknown6[i] = reader.read_byte()?;
         }
         let hot_slots = array::try_from_fn(|_| HotSlot::read_from(reader))?;
-        let camera_distance = reader.read_float()?;
 
-        let maybe_loot_radius = if version == 6 {
-            reader.read_float()?
+        let unknown7 = if version == 6 {
+            Some(reader.read_int()?)
         } else {
-            -1.0
+            None
         };
+
+        let camera_distance = reader.read_float()?;
 
         reader.end_block()?;
 
@@ -60,7 +61,7 @@ impl Readable for UISettings {
             unknown6,
             unknown1,
             unknown3,
-            maybe_loot_radius,
+            unknown7,
         })
     }
 }
