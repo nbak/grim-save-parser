@@ -1,0 +1,16 @@
+[package]
+name = "server-app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+parser = { path = "../parser" }
+
+serde_json.workspace = true
+serde.workspace = true
+serde-big-array.workspace = true
+
+hyper = { version = "1", features = ["full"] }
+hyper-util = { version = "0.1.2", features = ["tokio"] }
+tokio = { version = "1", features = ["full"] }
+http-body-util = "0.1.0"

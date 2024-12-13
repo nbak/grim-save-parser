@@ -1,35 +1,16 @@
-#![feature(array_try_from_fn)]
-
 use http_body_util::{combinators::BoxBody, BodyExt, Full};
 use hyper::body::{Buf, Bytes};
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::{Method, Request, Response};
 use hyper_util::rt::TokioIo;
-use parser::Readable;
-use serde::Serialize;
-use std::io::Read;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
-use crate::parser::{
-    character::CharacterReader, formulas::FormulasReader, stash::StashFileReader, Reader,
+use parser::{
+    parser::{character::CharacterReader, formulas::FormulasReader, stash::StashFileReader, Reader},
+    util::{self, map_to_json},
 };
-
-mod parser;
-mod util;
-
-fn map_to_str<T, U>(reader: Box<&mut dyn Reader<Source = T, Item = U>>) -> util::Result<String>
-where
-    T: Read,
-    U: Readable + Serialize,
-{
-    let obj = reader.read()?;
-    match serde_json::to_string(&obj) {
-        Ok(res) => Ok(res),
-        Err(e) => Err(util::CustomError::new(e.to_string())),
-    }
-}
 
 fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
     Full::new(chunk.into())
@@ -43,18 +24,15 @@ async fn handle(
     let result = match (req.method(), req.uri().path()) {
         (&Method::POST, "/character") => {
             let whole_body = req.collect().await?.to_bytes();
-            println!("{}", whole_body.len());
-            map_to_str(Box::new(&mut CharacterReader::new(whole_body.reader())))
+            map_to_json(Box::new(&mut CharacterReader::new(whole_body.reader())))
         }
         (&Method::POST, "/stash") => {
             let whole_body = req.collect().await?.to_bytes();
-            println!("{}", whole_body.len());
-            map_to_str(Box::new(&mut StashFileReader::new(whole_body.reader())))
+            map_to_json(Box::new(&mut StashFileReader::new(whole_body.reader())))
         }
         (&Method::POST, "/formulas") => {
             let whole_body = req.collect().await?.to_bytes();
-            println!("{}", whole_body.len());
-            map_to_str(Box::new(&mut FormulasReader::new(whole_body.reader())))
+            map_to_json(Box::new(&mut FormulasReader::new(whole_body.reader())))
         }
         _ => util::Result::Err(util::CustomError::new("no method".to_owned())),
     };
