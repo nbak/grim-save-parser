@@ -3,10 +3,13 @@ use std::{cell::RefCell, io::Read};
 
 use crate::util::Result;
 
-use super::model::FormulaSet;
-use super::parser::{Block, Parser};
 use super::Reader;
-use super::Readable;
+
+use crate::parser::{
+    model::FormulaSet,
+    parser::{Block, Parser},
+    Readable,
+};
 
 pub struct FormulasReader<T: Read> {
     source: RefCell<T>,

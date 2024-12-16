@@ -8,7 +8,7 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 use parser::{
-    parser::{character::CharacterReader, formulas::FormulasReader, stash::StashFileReader, Reader},
+    parser::{CharacterReader, FormulasReader, Reader, StashFileReader},
     util::{self, map_to_json},
 };
 

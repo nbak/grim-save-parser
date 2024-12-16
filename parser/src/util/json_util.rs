@@ -1,7 +1,7 @@
-use std::io::Read;
 use crate::parser::{Readable, Reader};
+use crate::util::{CustomError, Result};
 use serde::Serialize;
-use crate::util::{Result, CustomError};
+use std::io::Read;
 
 pub fn map_to_json<T, U>(reader: Box<&mut dyn Reader<Source = T, Item = U>>) -> Result<String>
 where

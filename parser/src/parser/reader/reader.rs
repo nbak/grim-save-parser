@@ -2,7 +2,7 @@ use std::io::Read;
 
 use crate::util::Result;
 
-use super::Readable;
+use super::super::Readable;
 
 pub trait Reader {
     type Source: Read;

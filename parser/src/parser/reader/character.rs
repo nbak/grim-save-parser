@@ -1,16 +1,17 @@
-use std::{
-    cell::{RefCell, RefMut},
-    io::Read,
-};
+use std::cell::RefMut;
+use std::{cell::RefCell, io::Read};
 
 use crate::util::{CustomError, Result};
 
-use super::model::StashFile;
-use super::parser::{Block, Parser};
-use super::Readable;
 use super::Reader;
 
-pub struct StashFileReader<T> {
+use crate::parser::{
+    model::CharacterFile,
+    parser::{Block, Parser},
+    Readable,
+};
+
+pub struct CharacterReader<T: Read> {
     source: RefCell<T>,
     key: u32,
     table: [u32; 256],
@@ -18,12 +19,12 @@ pub struct StashFileReader<T> {
     blocks: Vec<Block>,
 }
 
-impl<T: Read> Reader for StashFileReader<T> {
-    type Item = StashFile;
+impl<T: Read> Reader for CharacterReader<T> {
+    type Item = CharacterFile;
     type Source = T;
 
     fn new(source: T) -> Self {
-        StashFileReader {
+        CharacterReader {
             source: RefCell::new(source),
             key: 0,
             table: [0; 256],
@@ -31,13 +32,14 @@ impl<T: Read> Reader for StashFileReader<T> {
             blocks: Vec::new(),
         }
     }
-    fn read(&mut self) -> Result<StashFile> {
+    fn read(&mut self) -> Result<CharacterFile> {
         self.read_key()?;
-        StashFile::read_from(self)
+
+        CharacterFile::read_from(self)
     }
 }
 
-impl<T: Read> Parser for StashFileReader<T> {
+impl<T: Read> Parser for CharacterReader<T> {
     fn get_source(&self) -> RefMut<dyn Read> {
         self.source.borrow_mut()
     }
