@@ -25,18 +25,17 @@ impl<T: Read> Reader for StashFileReader<T> {
     type Item = StashFile;
     type Source = T;
 
-    fn new(source: T) -> Self {
-        StashFileReader {
+    fn read(source: Self::Source) -> Result<Self::Item> {
+        let mut reader = StashFileReader {
             source: RefCell::new(source),
             key: 0,
             table: [0; 256],
             cur_pos: 0,
             blocks: Vec::new(),
-        }
-    }
-    fn read(&mut self) -> Result<StashFile> {
-        self.read_key()?;
-        StashFile::read_from(self)
+        };
+
+        reader.read_key()?;
+        StashFile::read_from(&mut reader)
     }
 }
 

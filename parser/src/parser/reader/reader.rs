@@ -8,6 +8,5 @@ pub trait Reader {
     type Source: Read;
     type Item: Readable;
 
-    fn new(source: Self::Source) -> Self where Self: Sized;
-    fn read(&mut self) -> Result<Self::Item>;
+    fn read(source: Self::Source) -> Result<Self::Item>;
 }

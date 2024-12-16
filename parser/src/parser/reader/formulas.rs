@@ -19,13 +19,11 @@ impl<T: Read> Reader for FormulasReader<T> {
     type Item = FormulaSet;
     type Source = T;
 
-    fn new(source: Self::Source) -> Self {
-        FormulasReader {
+    fn read(source: Self::Source) -> Result<Self::Item> {
+        let mut reader = FormulasReader {
             source: RefCell::new(source),
-        }
-    }
-    fn read(&mut self) -> Result<Self::Item> {
-        FormulaSet::read_from(self)
+        };
+        FormulaSet::read_from(&mut reader)
     }
 }
 

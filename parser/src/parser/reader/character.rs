@@ -23,19 +23,18 @@ impl<T: Read> Reader for CharacterReader<T> {
     type Item = CharacterFile;
     type Source = T;
 
-    fn new(source: T) -> Self {
-        CharacterReader {
+    fn read(source: Self::Source) -> Result<Self::Item> {
+        let mut reader = CharacterReader {
             source: RefCell::new(source),
             key: 0,
             table: [0; 256],
             cur_pos: 0,
             blocks: Vec::new(),
-        }
-    }
-    fn read(&mut self) -> Result<CharacterFile> {
-        self.read_key()?;
+        };
 
-        CharacterFile::read_from(self)
+        reader.read_key()?;
+
+        CharacterFile::read_from(&mut reader)
     }
 }
 

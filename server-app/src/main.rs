@@ -7,10 +7,7 @@ use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
-use parser::{
-    parser::{CharacterReader, FormulasReader, Reader, StashFileReader},
-    util::{self, map_to_json},
-};
+use parser::util::{self, map_to_json};
 
 fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
     Full::new(chunk.into())
@@ -21,18 +18,11 @@ fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
 async fn handle(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    let result = match (req.method(), req.uri().path()) {
-        (&Method::POST, "/character") => {
+    let result = match req.method() {
+        &Method::POST => {
+            let path = req.uri().path().to_owned();
             let whole_body = req.collect().await?.to_bytes();
-            map_to_json(Box::new(&mut CharacterReader::new(whole_body.reader())))
-        }
-        (&Method::POST, "/stash") => {
-            let whole_body = req.collect().await?.to_bytes();
-            map_to_json(Box::new(&mut StashFileReader::new(whole_body.reader())))
-        }
-        (&Method::POST, "/formulas") => {
-            let whole_body = req.collect().await?.to_bytes();
-            map_to_json(Box::new(&mut FormulasReader::new(whole_body.reader())))
+            map_to_json(&path[1..], whole_body.reader())
         }
         _ => util::Result::Err(util::CustomError::new("no method".to_owned())),
     };
