@@ -9,3 +9,5 @@ parser = { path = "../parser" }
 serde_json.workspace = true
 serde.workspace = true
 serde-big-array.workspace = true
+
+clap = { version = "4.5.23", features = ["derive"] }

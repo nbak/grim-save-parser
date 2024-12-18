@@ -14,7 +14,7 @@ where
 }
 
 /// Parses data from `source` based on `entity_type`
-/// 
+///
 /// `entity_type` can be one of `character`, `formulas` or `stash`
 pub fn map_to_json<T: Read>(entity_type: &str, source: T) -> Result<String> {
     match entity_type {
