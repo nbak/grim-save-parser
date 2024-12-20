@@ -35,7 +35,7 @@ impl Readable for CharacterFile {
     where
         Self: Sized,
     {
-        ensure_eq(reader.read_int()?, 0x58434447, "start bytes")?;
+        ensure_eq(reader.read_int()?, 0x58434447, "start bytes 0")?;
         ensure_eq(reader.read_int()?, 2, "start bytes 1")?;
         let hdr = Header::read_from(reader)?;
         ensure_eq(reader.read_byte()?, 3, "start bytes 2")?;
