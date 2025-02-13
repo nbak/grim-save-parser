@@ -1,7 +1,6 @@
-use std::array;
+use std::{array, collections::BTreeMap};
 
 use serde::{Deserialize, Serialize};
-use serde_big_array::BigArray;
 
 use crate::util::Result;
 
@@ -12,8 +11,7 @@ use super::{
 
 #[derive(Deserialize, Serialize)]
 pub struct UISettings {
-    #[serde(with = "BigArray")]
-    hot_slots: [HotSlot; 46],
+    hot_slots: BTreeMap<u32, Vec<HotSlot>>,
     unknown4: [String; 5],
     unknown5: [String; 5],
     unknown2: u32,
@@ -21,14 +19,14 @@ pub struct UISettings {
     unknown6: [u8; 5],
     unknown1: u8,
     unknown3: u8,
-    unknown7: Option<u32>,
 }
 
-const VERSIONS: [u32; 2] = [5, 6];
+const VERSIONS: [u32; 3] = [5, 6, 7];
 
 impl Readable for UISettings {
     fn read_from(reader: &mut dyn Parser) -> Result<Self> {
         let version = reader.start_block_with_versions(14, &VERSIONS)?;
+        println!("{}", version);
         let unknown1 = reader.read_byte()?;
         let unknown2 = reader.read_int()?;
         let unknown3 = reader.read_byte()?;
@@ -40,13 +38,34 @@ impl Readable for UISettings {
             unknown5[i] = String::read_from(reader)?;
             unknown6[i] = reader.read_byte()?;
         }
-        let hot_slots = array::try_from_fn(|_| HotSlot::read_from(reader))?;
 
-        let unknown7 = if version == 6 {
-            Some(reader.read_int()?)
-        } else {
-            None
+        let hot_sets_quantity = if version == 7 {
+            reader.read_int()?
+        } else { 1 };
+
+        let hot_set_slots = match version {
+            5 => 46,
+            6 => 47,
+            7 => reader.read_int()?,
+            _ => 0 // unreachable
         };
+
+        let mut hot_slots = BTreeMap::new();
+
+        for i in 0..hot_sets_quantity {
+            let key = if version == 7 {
+                reader.read_int()?
+            } else {
+                i
+            };
+            let mut hot_set = Vec::new();
+
+            for _j in 0..hot_set_slots {
+                hot_set.push(HotSlot::read_from(reader)?);
+            }
+
+            hot_slots.insert(key, hot_set);
+        }
 
         let camera_distance = reader.read_float()?;
 
@@ -61,7 +80,6 @@ impl Readable for UISettings {
             unknown6,
             unknown1,
             unknown3,
-            unknown7,
         })
     }
 }

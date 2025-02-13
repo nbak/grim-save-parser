@@ -20,6 +20,6 @@ Parsers:
 | `stash` | [parser::StashFileReader](./parser/src/parser/reader/stash.rs) | `transfer.gst` |
 
 
-Stash and character parsers based on https://github.com/AaronHutchinson/Grim-Dawn-Save-Decryption
+Stash and character parsers based on https://github.com/AaronHutchinson/Grim-Dawn-Save-Decryption and https://github.com/wr8fdy/yagde
 
 Formulas parser based on https://github.com/marius00/iagd
